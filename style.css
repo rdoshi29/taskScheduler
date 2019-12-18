@@ -77,7 +77,6 @@ table {
   }
   
   .flex-container > div {
-    width: 500px;
     margin: 10px;
     padding: 10px;
   }
