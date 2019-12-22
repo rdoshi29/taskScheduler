@@ -44,7 +44,7 @@
     <?php
         include('connect.php');
         $hey=$_SESSION['username'];
-        $sql = "SELECT * FROM task where username='$hey' and label='1' order by date(deadline)";
+        $sql = "SELECT * FROM task where username='$hey' and label='1'and deadline > CURRENT_DATE order by date(deadline)";
         $result = mysqli_query($conn, $sql);
         echo "<br>";
         echo "<table class='table table-hover table-fixed'>
@@ -60,7 +60,7 @@
               echo"<tr><th scope='row'><button type='button' class='btn btn-default view_data' data-toggle='modal' data-target='#modal1' id=".$row['taskid']."><img src='https://image.flaticon.com/icons/png/512/84/84380.png'></button></th><td>".$row["tname"]."</td><td>".$row["deadline"]."</td></tr>";
             }
         } 
-        echo "</tbody></table>";
+        echo "<tr><td><button type='button' class='btn btn-default add_data' data-toggle='modal' data-target='#modal2' id='1'><img src='https://image.flaticon.com/icons/png/512/84/84380.png'></button></td></tr></tbody></table>";
         $conn -> close();
       ?>
     </div>
@@ -68,7 +68,7 @@
     <?php
         include('connect.php');
         $hey=$_SESSION['username'];
-        $sql = "SELECT * FROM task where username='$hey' and label='2' order by date(deadline)";
+        $sql = "SELECT * FROM task where username='$hey' and label='2' and deadline > CURRENT_DATE order by date(deadline)";
         $result = mysqli_query($conn, $sql);
         echo "<br>";
         echo "<table class='table table-hover table-fixed'>
@@ -92,7 +92,7 @@
     <?php
         include('connect.php');
         $hey=$_SESSION['username'];
-        $sql = "SELECT * FROM task where username='$hey' and label='3' order by date(deadline)";
+        $sql = "SELECT * FROM task where username='$hey' and label='3' and deadline > CURRENT_DATE order by date(deadline)";
         $result = mysqli_query($conn, $sql);
         echo "<br>";
         echo "<table class='table table-hover table-fixed'>
@@ -116,7 +116,7 @@
     <?php
         include('connect.php');
         $hey=$_SESSION['username'];
-        $sql = "SELECT * FROM task where username='$hey' and label='4' order by date(deadline)";
+        $sql = "SELECT * FROM task where username='$hey' and label='4' and deadline > CURRENT_DATE order by date(deadline)";
         $result = mysqli_query($conn, $sql);
         echo "<br>";
         echo "<table class='table table-hover table-fixed'>
@@ -162,22 +162,34 @@
       ?>
 </div>
 </div>
-<div id="modal1" class="modal fade">  
+  <div id="modal1" class="modal fade">  
       <div class="modal-dialog">  
-           <div class="modal-content">  
+          <div class="modal-content">  
                 <div class="modal-header">    
                     <h4 class="modal-title">Task details</h4>
                     <button type="button" class="close" data-dismiss="modal">&times;</button>  
                 </div>  
-                <div class="modal-body" id="task_detail"> 
+                <div class="modal-body" id="task_detail">
 
-                </div>  
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-danger" name="deletebutton"><img src="https://cdn.iconscout.com/icon/premium/png-512-thumb/delete-1432400-1211078.png"></button> 
-                </div>  
-           </div>  
+                </div> 
+          </div>             
       </div>  
- </div> 
+  </div>  
+
+  <div id="modal2" class="modal fade">  
+      <div class="modal-dialog">  
+          <div class="modal-content">  
+                <div class="modal-header">    
+                    <h4 class="modal-title">New task</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>  
+                </div>  
+                <div class="modal-body" id="task_new">
+                 
+                </div> 
+          </div>             
+      </div>  
+  </div>  
+</div> 
 </body>
 
 </html>
@@ -197,5 +209,57 @@
                 }  
            });  
       });  
+ });
+
+ $(document).ready(function(){  
+      $('.add_data').click(function(){  
+           var label = $(this).attr("label");  
+           $.ajax({  
+                url:"add.php",  
+                method:"post",  
+                data:{label:label},  
+                success:function(data){  
+                     $('#task_new').html(data);  
+                     $('#modal2').modal("show");  
+                }  
+           });  
+      });  
  });  
  </script>
+
+<?php
+if (isset($_POST['save'])) {
+$ti=$_POST["taskno"];
+$tn=$_POST["task"];
+$dl=$_POST["deadline"];
+$td=$_POST["detail"];
+include('connect.php');
+$sql = "UPDATE task SET tname='$tn',detail='$td',deadline='$dl' WHERE taskid='$ti'";
+$conn->close();
+}
+?>
+
+<?php
+if (isset($_POST['deletebutton'])) {
+$ti=$_POST["taskno"];
+include('connect.php');
+$sql = "Delete from task WHERE taskid='$ti'";
+$conn->close();
+}
+?>
+
+<?php 
+ if(isset($_POST["insert"]))
+ {
+    include('connect.php'); 
+    $hey = $_SESSION['username'];
+    $label = mysqli_real_escape_string($conn, $_POST['label']);
+    $tn = mysqli_real_escape_string($conn, $_POST['task']);
+    $dl = mysqli_real_escape_string($conn, $_POST['deadline']);
+    $det = mysqli_real_escape_string($conn, $_POST['detail']);
+    $label = $_POST['label'];
+    $query = "insert into task(username, tname, detail, label, deadline) values('$hey', '$tn', '$det', '$label', '$dl')";
+    $results = mysqli_query($conn, $query);
+    $conn -> close();
+ }
+?>
